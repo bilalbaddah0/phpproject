@@ -1,0 +1,31 @@
+# Temporary and debug files
+debug_*.php
+fix_password.php
+update_database.php
+test_password.php
+
+# Configuration files (uncomment if you want to exclude config)
+# config/database.php
+# config/config.php
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Uploads (if you add file upload feature later)
+uploads/*
+!uploads/.gitkeep
+
+# Temporary files
+*.tmp
+*.temp
+~*

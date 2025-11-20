@@ -1,0 +1,150 @@
+<?php
+require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../../models/Course.php';
+require_once __DIR__ . '/../../models/Enrollment.php';
+
+requireRole(ROLE_STUDENT);
+
+$courseModel = new Course();
+$enrollmentModel = new Enrollment();
+
+// Get search and filter parameters
+$search = $_GET['search'] ?? null;
+$category_id = $_GET['category'] ?? null;
+
+$courses = $courseModel->getAllPublishedCourses($search, $category_id);
+$categories = $courseModel->getAllCategories();
+
+// Handle enrollment
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['enroll'])) {
+    $course_id = intval($_POST['course_id']);
+    $result = $enrollmentModel->enrollStudent($_SESSION['user_id'], $course_id);
+    
+    if ($result['success']) {
+        $_SESSION['success'] = 'Successfully enrolled in the course!';
+        redirect('views/student/course_view.php?id=' . $course_id);
+    } else {
+        $_SESSION['error'] = $result['message'];
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Courses - <?php echo SITE_NAME; ?></title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="dashboard.php" class="logo"><?php echo SITE_NAME; ?></a>
+                <ul class="nav-links">
+                    <li><a href="dashboard.php">My Learning</a></li>
+                    <li><a href="browse.php">Browse Courses</a></li>
+                    <li><span><?php echo htmlspecialchars($_SESSION['full_name']); ?></span></li>
+                    <li>
+                        <form action="../../controllers/AuthController.php" method="POST" style="display: inline;">
+                            <input type="hidden" name="action" value="logout">
+                            <button type="submit" class="btn btn-sm btn-outline">Logout</button>
+                        </form>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container" style="margin-top: 2rem;">
+        <h1>Browse All Courses</h1>
+
+        <?php if (isset($_SESSION['success'])): ?>
+            <div class="alert alert-success">
+                <?php echo $_SESSION['success']; unset($_SESSION['success']); ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="alert alert-error">
+                <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
+            </div>
+        <?php endif; ?>
+
+        <div class="card mb-3">
+            <form method="GET" action="">
+                <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 1rem;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <input type="text" name="search" class="form-control" placeholder="Search courses..." 
+                               value="<?php echo htmlspecialchars($search ?? ''); ?>">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <select name="category" class="form-control">
+                            <option value="">All Categories</option>
+                            <?php foreach ($categories as $cat): ?>
+                                <option value="<?php echo $cat['category_id']; ?>" 
+                                        <?php echo $category_id == $cat['category_id'] ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($cat['category_name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </form>
+        </div>
+
+        <?php if (empty($courses)): ?>
+            <div class="card">
+                <p style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                    No courses found. Try adjusting your search criteria.
+                </p>
+            </div>
+        <?php else: ?>
+            <div class="course-grid">
+                <?php foreach ($courses as $course): ?>
+                    <?php 
+                    $isEnrolled = $enrollmentModel->isEnrolled($_SESSION['user_id'], $course['course_id']);
+                    ?>
+                    <div class="course-card">
+                        <div class="course-thumbnail">📚</div>
+                        <div class="course-body">
+                            <h3 class="course-title"><?php echo htmlspecialchars($course['title']); ?></h3>
+                            <p class="course-instructor">👨‍🏫 <?php echo htmlspecialchars($course['instructor_name']); ?></p>
+                            <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">
+                                <?php echo htmlspecialchars(substr($course['description'], 0, 100)) . '...'; ?>
+                            </p>
+                            
+                            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                                <span class="badge badge-primary"><?php echo htmlspecialchars($course['category_name']); ?></span>
+                                <span class="badge badge-warning"><?php echo ucfirst($course['level']); ?></span>
+                            </div>
+
+                            <div class="course-meta">
+                                <div>
+                                    <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                                        <?php echo $course['enrollment_count']; ?> students
+                                    </div>
+                                </div>
+                                
+                                <?php if ($isEnrolled): ?>
+                                    <a href="course_view.php?id=<?php echo $course['course_id']; ?>" class="btn btn-sm btn-secondary">
+                                        View Course
+                                    </a>
+                                <?php else: ?>
+                                    <form method="POST" style="margin: 0;">
+                                        <input type="hidden" name="course_id" value="<?php echo $course['course_id']; ?>">
+                                        <button type="submit" name="enroll" class="btn btn-sm btn-primary">
+                                            Enroll Now
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+</body>
+</html>

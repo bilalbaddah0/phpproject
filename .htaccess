@@ -1,0 +1,43 @@
+# Allow URL rewriting
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Redirect to HTTPS (uncomment if using SSL)
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    
+    # Prevent directory browsing
+    Options -Indexes
+    
+    # Protect sensitive files
+    <FilesMatch "\.(sql|md|htaccess)$">
+        Order Allow,Deny
+        Deny from all
+    </FilesMatch>
+</IfModule>
+
+# Prevent access to config files
+<Files "database.php">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Set default charset
+AddDefaultCharset UTF-8
+
+# Enable file uploads
+php_value upload_max_filesize 50M
+php_value post_max_size 50M
+php_value max_execution_time 300
+php_value max_input_time 300
+
+# Security headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Error pages (optional)
+ErrorDocument 404 /php/lms/index.php
+ErrorDocument 403 /php/lms/index.php
