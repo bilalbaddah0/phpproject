@@ -101,6 +101,7 @@ if (!function_exists('formatDate')) {
                 <li><a href="users.php">Users</a></li>
                 <li><a href="courses.php">Courses</a></li>
                 <li><a href="course_approvals.php">Approvals</a></li>
+                <li><a href="categories.php">Categories</a></li>
                 <li><span><?php echo htmlspecialchars($_SESSION['full_name']); ?></span></li>
                 <li>
                     <form action="../Shared/logout.php" method="POST" style="display:inline;">
