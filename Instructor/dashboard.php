@@ -85,7 +85,6 @@ $totalEnrollments = array_sum(array_column($courses, 'enrollment_count'));
                             <th>Approval</th>
                             <th>Enrollments</th>
                             <th>Created</th>
-                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -114,10 +113,6 @@ $totalEnrollments = array_sum(array_column($courses, 'enrollment_count'));
                                 </td>
                                 <td><?php echo $course['enrollment_count']; ?> students</td>
                                 <td><?php echo formatDate($course['created_at']); ?></td>
-                                <td>
-                                    <a href="edit_course.php?id=<?php echo $course['course_id']; ?>" class="btn btn-sm btn-primary">Edit</a>
-                                    <a href="manage_content.php?id=<?php echo $course['course_id']; ?>" class="btn btn-sm btn-secondary">Content</a>
-                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

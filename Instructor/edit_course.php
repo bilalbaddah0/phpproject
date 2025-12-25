@@ -1,17 +1,9 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../models/Course.php';
-
-requireRole(ROLE_INSTRUCTOR);
-
-$course_id = intval($_GET['id'] ?? 0);
-$courseModel = new Course();
-$course = $courseModel->getCourseById($course_id);
-
-// Verify ownership
-if (!$course || $course['instructor_id'] != $_SESSION['user_id']) {
-    redirect('Instructor/dashboard.php');
-}
+// Course editing/removal of metadata by instructors is not allowed in this build.
+$_SESSION['error'] = 'Editing courses is disabled. Instructors can create courses but cannot edit or add content.';
+redirect('courses.php');
+exit;
 
 $categories = $courseModel->getAllCategories();
 

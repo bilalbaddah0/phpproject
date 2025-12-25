@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($result['success']) {
         $_SESSION['success'] = 'Course created successfully!';
-        redirect('Instructor/manage_content.php?id=' . $result['course_id']);
+        redirect('courses.php');
     } else {
         $_SESSION['error'] = 'Failed to create course';
     }

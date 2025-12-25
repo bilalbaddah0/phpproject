@@ -46,7 +46,6 @@ $courses = $courseModel->getCoursesByInstructor($_SESSION['user_id']);
                             <th>Category</th>
                             <th>Status</th>
                             <th>Enrollments</th>
-                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -56,10 +55,6 @@ $courses = $courseModel->getCoursesByInstructor($_SESSION['user_id']);
                                 <td><?php echo htmlspecialchars($course['category_name']); ?></td>
                                 <td><?php echo ucfirst($course['status']); ?></td>
                                 <td><?php echo $course['enrollment_count']; ?></td>
-                                <td>
-                                    <a href="edit_course.php?id=<?php echo $course['course_id']; ?>" class="btn btn-sm btn-primary">Edit</a>
-                                    <a href="manage_content.php?id=<?php echo $course['course_id']; ?>" class="btn btn-sm btn-secondary">Content</a>
-                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

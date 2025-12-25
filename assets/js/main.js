@@ -47,21 +47,4 @@ function confirmDelete(message = 'Are you sure you want to delete this?') {
     return confirm(message);
 }
 
-// Progress animation
-function animateProgress() {
-    const progressBars = document.querySelectorAll('.progress-fill');
-    progressBars.forEach(bar => {
-        const width = bar.style.width;
-        bar.style.width = '0%';
-        setTimeout(() => {
-            bar.style.width = width;
-        }, 100);
-    });
-}
-
-// Call on page load
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', animateProgress);
-} else {
-    animateProgress();
-}
+// Progress animation removed — course progress is tracked at course level and not shown as progress bars.

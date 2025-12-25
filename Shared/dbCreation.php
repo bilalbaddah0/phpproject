@@ -53,15 +53,6 @@ $table3 = "CREATE TABLE IF NOT EXISTS courses (
     FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL
 )";
 
-$table4 = "CREATE TABLE IF NOT EXISTS lessons (
-    lesson_id INT AUTO_INCREMENT PRIMARY KEY,
-    course_id INT NOT NULL,
-    lesson_title VARCHAR(255) NOT NULL,
-    content TEXT,
-    lesson_order INT NOT NULL,
-    FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE
-)";
-
 $table5 = "CREATE TABLE IF NOT EXISTS enrollments (
     enrollment_id INT AUTO_INCREMENT PRIMARY KEY,
     student_id INT NOT NULL,
@@ -88,33 +79,28 @@ if ($conn->query($table3) === TRUE) {
     echo "Error creating courses table: " . $conn->error . "\n";
 }
 
-if ($conn->query($table4) === TRUE) {
-    echo "Lessons table created successfully\n";
-} else {
-    echo "Error creating lessons table: " . $conn->error . "\n";
-}
-
 if ($conn->query($table5) === TRUE) {
     echo "Enrollments table created successfully\n";
 } else {
     echo "Error creating enrollments table: " . $conn->error . "\n";
 }
 
-$table6 = "CREATE TABLE IF NOT EXISTS lesson_progress (
+// Tracking at course level (students mark course as done/not done)
+$table6 = "CREATE TABLE IF NOT EXISTS student_course_status (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    enrollment_id INT NOT NULL,
-    lesson_id INT NOT NULL,
+    student_id INT NOT NULL,
+    course_id INT NOT NULL,
     is_completed TINYINT(1) DEFAULT 0,
-    completed_at DATETIME NULL,
-    UNIQUE (enrollment_id, lesson_id),
-    FOREIGN KEY (enrollment_id) REFERENCES enrollments(enrollment_id) ON DELETE CASCADE,
-    FOREIGN KEY (lesson_id) REFERENCES lessons(lesson_id) ON DELETE CASCADE
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE (student_id, course_id),
+    FOREIGN KEY (student_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE
 )";
 
 if ($conn->query($table6) === TRUE) {
-    echo "Lesson progress table created successfully\n";
+    echo "Student course status table created successfully\n";
 } else {
-    echo "Error creating lesson_progress table: " . $conn->error . "\n";
+    echo "Error creating student_course_status table: " . $conn->error . "\n";
 }
 
 $conn->close();

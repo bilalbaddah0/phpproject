@@ -1,13 +1,10 @@
 <?php
 session_start();
-require_once __DIR__ . '/../Shared/db_connection.php';
-
-// Ensure student is logged in
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || strtolower($_SESSION['role']) !== 'student') {
-    header('Location: ../Shared/login.php');
-    exit;
-}
-
+// Course view removed — use Browse or My Learning instead.
+$_SESSION['error'] = 'Course view is not available. Use Browse or My Learning to manage course tracking.';
+header('Location: browse.php');
+exit;
+?>
 $course_id = intval($_GET['id'] ?? 0);
 $student_id = $_SESSION['user_id'];
 
