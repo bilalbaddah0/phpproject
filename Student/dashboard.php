@@ -115,14 +115,14 @@ $inProgressCourses = $totalCourses - $completedCourses;
                                     <div style="display:flex; gap:0.5rem; align-items:center;">
                                         <?php if ($course['is_completed']): ?>
                                             <span class="badge badge-success">Completed</span>
-                                            <form method="POST" action="toggle_course_status.php" style="margin:0 0 0 0; display:inline;">
+                                            <form method="POST" action="course_status.php" style="margin:0 0 0 0; display:inline;">
                                                 <input type="hidden" name="course_id" value="<?php echo $course['course_id']; ?>">
                                                 <input type="hidden" name="completed" value="0">
                                                 <button type="submit" class="btn btn-sm btn-outline">Mark as not done</button>
                                             </form>
                                         <?php else: ?>
                                             <span class="badge badge-primary">In Progress</span>
-                                            <form method="POST" action="toggle_course_status.php" style="margin:0 0 0 0; display:inline;">
+                                            <form method="POST" action="course_status.php" style="margin:0 0 0 0; display:inline;">
                                                 <input type="hidden" name="course_id" value="<?php echo $course['course_id']; ?>">
                                                 <input type="hidden" name="completed" value="1">
                                                 <button type="submit" class="btn btn-sm btn-primary">Mark as done</button>

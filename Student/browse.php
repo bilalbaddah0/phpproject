@@ -185,14 +185,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['enroll'])) {
                                 <?php if ($isEnrolled): ?>
                                     <?php $isCompleted = isCourseCompletedPDO($pdo, $_SESSION['user_id'], $course['course_id']); ?>
                                     <?php if ($isCompleted): ?>
-                                        <form method="POST" action="toggle_course_status.php" style="margin:0; display:inline;">
+                                        <form method="POST" action="course_status.php" style="margin:0; display:inline;">
                                             <input type="hidden" name="course_id" value="<?php echo $course['course_id']; ?>">
                                             <input type="hidden" name="completed" value="0">
                                             <button type="submit" class="btn btn-sm btn-outline">Mark as not done</button>
                                         </form>
                                         <span class="badge badge-success" style="margin-left:0.5rem;">Completed</span>
                                     <?php else: ?>
-                                        <form method="POST" action="toggle_course_status.php" style="margin:0; display:inline;">
+                                        <form method="POST" action="course_status.php" style="margin:0; display:inline;">
                                             <input type="hidden" name="course_id" value="<?php echo $course['course_id']; ?>">
                                             <input type="hidden" name="completed" value="1">
                                             <button type="submit" class="btn btn-sm btn-primary">Mark as done</button>
