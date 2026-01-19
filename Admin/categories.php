@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Basic admin check
 if (!isset($_SESSION['role']) || strtolower($_SESSION['role']) !== 'admin') {
     header('Location: ../Shared/login.php');
     exit;
@@ -9,7 +8,6 @@ if (!isset($_SESSION['role']) || strtolower($_SESSION['role']) !== 'admin') {
 
 require_once __DIR__ . '/../Shared/db_connection.php';
 
-// Handle category creation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_category'])) {
     $category_name = isset($_POST['category_name']) ? trim($_POST['category_name']) : '';
     $description = isset($_POST['description']) ? trim($_POST['description']) : '';
@@ -27,7 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_category'])) {
     exit;
 }
 
-// Handle category deletion
 if (isset($_GET['delete'])) {
     $category_id = intval($_GET['delete']);
     $del = $pdo->prepare("DELETE FROM categories WHERE category_id = ?");
@@ -43,17 +40,13 @@ if (isset($_GET['delete'])) {
 $stmt = $pdo->query("SELECT category_id, category_name, description FROM categories");
 $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Get course count for each category
 $cntStmt = $pdo->prepare("SELECT COUNT(*) as count FROM courses WHERE category_id = ?");
 foreach ($categories as &$cat) {
     $cntStmt->execute([$cat['category_id']]);
     $res = $cntStmt->fetch(PDO::FETCH_ASSOC);
     $cat['course_count'] = $res ? (int)$res['count'] : 0;
 }
-unset($cat);
-
-// Provide formatDate fallback if missing
-if (!function_exists('formatDate')) {
+unset($cat);if (!function_exists('formatDate')) {
     function formatDate($d) {
         $ts = strtotime($d);
         if ($ts === false) return 'N/A';

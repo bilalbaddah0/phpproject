@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Basic admin check
 if (!isset($_SESSION['role']) || strtolower($_SESSION['role']) !== 'admin') {
     header('Location: ../Shared/login.php');
     exit;
@@ -9,16 +8,6 @@ if (!isset($_SESSION['role']) || strtolower($_SESSION['role']) !== 'admin') {
 
 require_once __DIR__ . '/../Shared/db_connection.php';
 
-// Ensure approval-related columns exist (add if missing)
-try {
-    $pdo->exec("ALTER TABLE courses ADD COLUMN IF NOT EXISTS approval_status ENUM('pending','approved','rejected') DEFAULT 'pending'");
-    $pdo->exec("ALTER TABLE courses ADD COLUMN IF NOT EXISTS approved_by INT NULL");
-    $pdo->exec("ALTER TABLE courses ADD COLUMN IF NOT EXISTS approved_at DATETIME NULL");
-} catch (PDOException $e) {
-    // Ignore
-}
-
-// Handle approval actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     $course_id = (int)($_POST['course_id'] ?? 0);
@@ -37,10 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// Get filter
 $filter = $_GET['filter'] ?? 'pending';
 
-// Build query
 $baseSql = "SELECT c.course_id, c.title, c.description, c.price, c.level, c.approval_status,
         cat.category_name, u.full_name as instructor_name,
         (SELECT COUNT(*) FROM enrollments WHERE course_id = c.course_id) as enrollment_count
@@ -55,7 +42,6 @@ elseif ($filter === 'rejected') $baseSql .= " WHERE c.approval_status = 'rejecte
 $stmt = $pdo->query($baseSql);
 $courses = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
 
-// Count by status
 $status_counts = [];
 $countStmt = $pdo->query("SELECT approval_status, COUNT(*) as count FROM courses GROUP BY approval_status");
 if ($countStmt) {
@@ -64,7 +50,6 @@ if ($countStmt) {
     }
 }
 
-// Date formatter
 if (!function_exists('formatDate')) {
     function formatDate($d) {
         $ts = strtotime($d);

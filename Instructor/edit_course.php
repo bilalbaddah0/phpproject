@@ -1,7 +1,6 @@
 <?php
 session_start();
 require_once __DIR__ . '/../Shared/db_connection.php';
-// Ensure instructor is logged in
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || strtolower($_SESSION['role']) !== 'instructor') {
     header('Location: ../Shared/login.php');
     exit;
@@ -13,10 +12,8 @@ if (!$course_id) {
     header('Location: courses.php');
     exit;
 }
-// Fetch categories
 $catStmt = $pdo->query("SELECT category_id, category_name FROM categories ORDER BY category_name ASC");
 $categories = $catStmt->fetchAll(PDO::FETCH_ASSOC);
-// Fetch course (must belong to instructor)
 $stmt = $pdo->prepare("SELECT * FROM courses WHERE course_id = ? AND instructor_id = ?");
 $stmt->execute([$course_id, $instructor_id]);
 $course = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -25,7 +22,6 @@ if (!$course) {
     header('Location: courses.php');
     exit;
 }
-// Handle update
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = trim($_POST['title'] ?? '');
     $description = trim($_POST['description'] ?? '');
@@ -45,7 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $_SESSION['error'] = 'Please fill in all required fields.';
     }
-    // Refresh course data after update attempt
     $stmt = $pdo->prepare("SELECT * FROM courses WHERE course_id = ? AND instructor_id = ?");
     $stmt->execute([$course_id, $instructor_id]);
     $course = $stmt->fetch(PDO::FETCH_ASSOC);

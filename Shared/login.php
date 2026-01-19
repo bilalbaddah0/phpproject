@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Redirect if already logged in
 if (isset($_SESSION['role'])) {
     switch ($_SESSION['role']) {
         case 'admin':
@@ -26,26 +25,26 @@ if (isset($_SESSION['role'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #F9FAFB; } /* light-color */
+        body { background-color: #F9FAFB; } 
         .card {
             width: 400px;
             border: none;
-            box-shadow: 0 10px 15px rgba(0,0,0,0.1); /* shadow-lg */
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1); 
             padding: 30px;
             border-radius: 10px;
         }
-        .btn-primary { background-color: #4F46E5; border: none; font-weight: bold; } /* primary-color */
-        .btn-primary:hover { background-color: #4338CA; } /* primary-dark */
-        .text-primary-color { color: #4F46E5; font-weight: bold; } /* primary-color */
+        .btn-primary { background-color: #4F46E5; border: none; font-weight: bold; } 
+        .btn-primary:hover { background-color: #4338CA; } 
+        .text-primary-color { color: #4F46E5; font-weight: bold; } 
         .brand-name {
             font-family: 'Playfair Display', serif;
             font-size: 42px;
             font-weight: bold;
-            color: #4F46E5; /* primary-color */
+            color: #4F46E5; 
             text-align: center;
             margin-bottom: 20px;
             letter-spacing: 1px;
-            text-shadow: 2px 2px 5px rgba(79,70,229,0.2); /* primary-color tint */
+            text-shadow: 2px 2px 5px rgba(79,70,229,0.2); 
         }
         .alert { text-align: center; font-size: 14px; }
     </style>

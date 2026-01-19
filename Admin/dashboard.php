@@ -1,8 +1,6 @@
 <?php
-// Lightweight admin dashboard: use session + PDO (no models required)
 session_start();
 
-// Basic admin check
 if (!isset($_SESSION['role']) || strtolower($_SESSION['role']) !== 'admin') {
     header('Location: ../Shared/login.php');
     exit;
@@ -10,11 +8,9 @@ if (!isset($_SESSION['role']) || strtolower($_SESSION['role']) !== 'admin') {
 
 require_once __DIR__ . '/../Shared/db_connection.php';
 
-// Get users
-$stmt = $pdo->query("SELECT user_id, full_name, role, admin_status, instructor_status FROM users ORDER BY user_id DESC");
+$stmt = $pdo->query("SELECT user_id, full_name, role, admin_status, instructor_status, joined_at FROM users ORDER BY user_id DESC");
 $allUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Get courses with instructor name and enrollment counts
 $stmt = $pdo->query("SELECT c.course_id, c.title, u.full_name AS instructor_name, 
     (SELECT COUNT(*) FROM enrollments e WHERE e.course_id = c.course_id) AS enrollment_count
     FROM courses c
@@ -114,7 +110,7 @@ $totalUsers = count($allUsers);
                                         <?php echo ucfirst($status); ?>
                                     </span>
                                 </td>
-                                <td><?php echo isset($user['created_at']) ? formatDate($user['created_at']) : 'N/A'; ?></td>
+                                <td><?php echo isset($user['joined_at']) ? date('M d, Y', strtotime($user['joined_at'])) : 'N/A'; ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

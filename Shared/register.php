@@ -1,5 +1,4 @@
 <?php
-// register.php — styled registration form with role selection
 session_start();
 if (!empty($_SESSION['user_id'])) {
     header('Location: ../index.php');

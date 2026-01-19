@@ -3,7 +3,6 @@ session_start();
 
 require_once __DIR__ . '/../Shared/db_connection.php';
 
-// Ensure student is logged in
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || strtolower($_SESSION['role']) !== 'student') {
     header('Location: ../Shared/login.php');
     exit;
@@ -11,7 +10,6 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || strtolower($_SE
 
 $student_id = $_SESSION['user_id'];
 
-// Fetch enrolled courses with instructor name and enrollment id
 $stmt = $pdo->prepare("SELECT e.enrollment_id, e.course_id, 
     c.title, c.description, c.level, c.price, u.full_name AS instructor_name 
     FROM enrollments e 
@@ -21,7 +19,6 @@ $stmt = $pdo->prepare("SELECT e.enrollment_id, e.course_id,
 $stmt->execute([$student_id]);
 $enrolledCourses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Determine completion state for each enrollment via student_course_status table
 $courseIds = array_map(fn($c) => $c['course_id'], $enrolledCourses);
 $placeholders = $courseIds ? implode(',', array_fill(0, count($courseIds), '?')) : 'NULL';
 $statusMap = [];
@@ -40,7 +37,6 @@ foreach ($enrolledCourses as &$course) {
 }
 unset($course);
 
-// Calculate statistics
 $totalCourses = count($enrolledCourses);
 $completedCourses = count(array_filter($enrolledCourses, fn($c) => $c['is_completed']));
 $inProgressCourses = $totalCourses - $completedCourses;

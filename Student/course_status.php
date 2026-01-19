@@ -1,6 +1,5 @@
 <?php
 session_start();
-// Use the shared DB connection from the parent folder
 require_once __DIR__ . '/../Shared/db_connection.php';
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || strtolower($_SESSION['role']) !== 'student') {
@@ -19,7 +18,6 @@ $student_id = $_SESSION['user_id'];
 $course_id = intval($_POST['course_id']);
 $completed = intval($_POST['completed']) === 1 ? 1 : 0;
 
-// Ensure the student is enrolled in the course
 $stmt = $pdo->prepare("SELECT COUNT(*) as cnt FROM enrollments WHERE student_id = ? AND course_id = ?");
 $stmt->execute([$student_id, $course_id]);
 $r = $stmt->fetch(PDO::FETCH_ASSOC);

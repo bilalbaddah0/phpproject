@@ -1,14 +1,12 @@
 <?php
 session_start();
 
-// Require DB and ensure student is logged in
 require_once __DIR__ . '/../Shared/db_connection.php';
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || strtolower($_SESSION['role']) !== 'student') {
     header('Location: ../Shared/login.php');
     exit;
 }
 
-// Helper to check enrollment
 function isEnrolledPDO($pdo, $student_id, $course_id) {
     $s = $pdo->prepare("SELECT COUNT(*) as cnt FROM enrollments WHERE student_id = ? AND course_id = ?");
     $s->execute([$student_id, $course_id]);
@@ -16,15 +14,12 @@ function isEnrolledPDO($pdo, $student_id, $course_id) {
     return ($r && $r['cnt'] > 0);
 }
 
-// Get search and filter parameters
 $search = $_GET['search'] ?? null;
 $category_id = $_GET['category'] ?? null;
 
-// Fetch categories
 $catStmt = $pdo->query("SELECT category_id, category_name FROM categories ORDER BY category_name ASC");
 $categories = $catStmt ? $catStmt->fetchAll(PDO::FETCH_ASSOC) : [];
 
-// Build courses query
 $params = [];
 $sql = "SELECT c.course_id, c.title, c.description, c.price, c.level, cat.category_name, u.full_name AS instructor_name, 
     (SELECT COUNT(*) FROM enrollments e WHERE e.course_id = c.course_id) AS enrollment_count
@@ -51,7 +46,6 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Helper to check if student marked course completed
 function isCourseCompletedPDO($pdo, $student_id, $course_id) {
     $s = $pdo->prepare("SELECT is_completed FROM student_course_status WHERE student_id = ? AND course_id = ? LIMIT 1");
     $s->execute([$student_id, $course_id]);
@@ -59,7 +53,6 @@ function isCourseCompletedPDO($pdo, $student_id, $course_id) {
     return ($r && $r['is_completed'] == 1);
 }
 
-// Handle enrollment
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['enroll'])) {
     $course_id = intval($_POST['course_id']);
     $student_id = $_SESSION['user_id'];
@@ -72,7 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['enroll'])) {
 
     $ins = $pdo->prepare("INSERT INTO enrollments (student_id, course_id) VALUES (?, ?)");
     if ($ins->execute([$student_id, $course_id])) {
-        // Initialize tracking record (not completed by default)
         $up = $pdo->prepare("INSERT INTO student_course_status (student_id, course_id, is_completed) VALUES (?, ?, 0) ON DUPLICATE KEY UPDATE student_id = student_id");
         $up->execute([$student_id, $course_id]);
 
