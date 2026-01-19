@@ -26,7 +26,7 @@ $conn->select_db($dbname);
 $table1 = "CREATE TABLE IF NOT EXISTS users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(255) NOT NULL,
     role ENUM('student','instructor','admin') NOT NULL,
     admin_status ENUM('pending','accepted','rejected') DEFAULT 'pending',

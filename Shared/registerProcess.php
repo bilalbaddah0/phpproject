@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $full_name = trim($_POST['full_name'] ?? '');
 $email = trim($_POST['email'] ?? '');
-$password = trim($_POST['password'] ?? '');
+$password_hash = trim($_POST['password'] ?? '');
 $role = $_POST['role'] ?? '';
 
 if ($full_name === '' || $email === '' || $password === '' || !in_array($role, ['admin', 'instructor', 'student'])) {
@@ -31,7 +31,7 @@ if ($stmt->fetch()) {
 
 $hash = password_hash($password, PASSWORD_DEFAULT);
 try {
-    $stmt = $pdo->prepare('INSERT INTO users (full_name, email, password, role) VALUES (:n, :e, :p, :r)');
+    $stmt = $pdo->prepare('INSERT INTO users (full_name, email, password_hash, role) VALUES (:n, :e, :p, :r)');
     $stmt->execute([':n' => $full_name, ':e' => $email, ':p' => $hash, ':r' => $role]);
     $_SESSION['success'] = 'Registration successful. Please login.';
     header('Location: login.php');

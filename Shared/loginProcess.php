@@ -4,7 +4,7 @@ session_start();
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $email = isset($_POST['email']) ? trim($_POST['email']) : '';
-    $password = isset($_POST['password']) ? trim($_POST['password']) : ''; 
+    $password = isset($_POST['password']) ? trim($_POST['password']) : '';
 
     if (empty($email) || empty($password)) {
         $_SESSION['error'] = "Please fill in all fields.";
@@ -18,13 +18,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit;
     }
 
-    $stmt = $pdo->prepare("SELECT user_id, email, password, full_name, role, admin_status, instructor_status FROM users WHERE email = ?");
+    $stmt = $pdo->prepare("SELECT user_id, email, password_hash, full_name, role, admin_status, instructor_status FROM users WHERE email = ?");
     $stmt->execute([$email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$user || !password_verify($password, $user['password'])
-    
-    ) {
+    if (!$user || !password_verify($password, $user['password_hash'])) {
         $_SESSION['error'] = "Invalid email or password.";
         header("Location: login.php");
         exit;
