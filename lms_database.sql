@@ -27,7 +27,7 @@ SET time_zone = "+00:00";
 -- Table structure for table `categories`
 --
 
-CREATE TABLE `categories` (
+CREATE TABLE IF NOT EXISTS `categories` (
   `category_id` int(11) NOT NULL,
   `category_name` varchar(100) NOT NULL,
   `description` text DEFAULT NULL
@@ -48,7 +48,7 @@ INSERT INTO `categories` (`category_id`, `category_name`, `description`) VALUES
 -- Table structure for table `courses`
 --
 
-CREATE TABLE `courses` (
+CREATE TABLE IF NOT EXISTS`courses` (
   `course_id` int(11) NOT NULL,
   `instructor_id` int(11) NOT NULL,
   `category_id` int(11) DEFAULT NULL,
@@ -77,7 +77,7 @@ INSERT INTO `courses` (`course_id`, `instructor_id`, `category_id`, `title`, `de
 -- Table structure for table `enrollments`
 --
 
-CREATE TABLE `enrollments` (
+CREATE TABLE IF NOT EXISTS `enrollments` (
   `enrollment_id` int(11) NOT NULL,
   `student_id` int(11) NOT NULL,
   `course_id` int(11) NOT NULL
@@ -97,7 +97,7 @@ INSERT INTO `enrollments` (`enrollment_id`, `student_id`, `course_id`) VALUES
 -- Table structure for table `student_course_status`
 --
 
-CREATE TABLE `student_course_status` (
+CREATE TABLE IF NOT EXISTS `student_course_status` (
   `id` int(11) NOT NULL,
   `student_id` int(11) NOT NULL,
   `course_id` int(11) NOT NULL,
@@ -119,7 +119,7 @@ INSERT INTO `student_course_status` (`id`, `student_id`, `course_id`, `is_comple
 -- Table structure for table `users`
 --
 
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
   `user_id` int(11) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
