@@ -183,6 +183,96 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .text-secondary {
             color: #6B7280;
         }
+
+        .description-cell {
+            max-width: 250px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            color: #4F46E5;
+            transition: all 0.2s;
+        }
+
+        .description-cell:hover {
+            text-decoration: underline;
+            color: #4338CA;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px rgba(0,0,0,0.15);
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #E5E7EB;
+            padding-bottom: 1rem;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #111827;
+        }
+
+        .close-btn {
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: #6B7280;
+            background: none;
+            border: none;
+            padding: 0;
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+            color: #111827;
+        }
+
+        .modal-body {
+            color: #374151;
+            line-height: 1.8;
+            word-wrap: break-word;
+        }
     </style>
 </head>
 <body>
@@ -231,7 +321,7 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <?php foreach ($courses as $course): ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($course['title'] ?? ''); ?></td>
-                                <td style="max-width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="<?php echo htmlspecialchars($course['description'] ?? ''); ?>"><?php echo htmlspecialchars($course['description'] ?? ''); ?></td>
+                                <td class="description-cell" onclick="openModal(<?php echo (int)$course['course_id']; ?>, '<?php echo htmlspecialchars(addslashes($course['title'] ?? ''), ENT_QUOTES); ?>', '<?php echo htmlspecialchars(addslashes($course['description'] ?? ''), ENT_QUOTES); ?>')" title="Click to view full description"><?php echo htmlspecialchars($course['description'] ?? ''); ?></td>
                                 <td><?php echo htmlspecialchars($course['category_name'] ?? '-'); ?></td>
                                 <td>$<?php echo number_format((float)($course['price'] ?? 0), 2); ?></td>
                                 <td><?php echo htmlspecialchars(ucfirst($course['level'] ?? '-')); ?></td>
@@ -267,5 +357,41 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php endif; ?>
         </div>
     </div>
+
+    <div id="descriptionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle"></h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="modalDescription"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal(courseId, title, description) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalDescription').textContent = description;
+            document.getElementById('descriptionModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('descriptionModal').classList.remove('active');
+        }
+
+        document.getElementById('descriptionModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeModal();
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
 </body>
 </html>
