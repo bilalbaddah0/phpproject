@@ -30,7 +30,8 @@ $table1 = "CREATE TABLE IF NOT EXISTS users (
     full_name VARCHAR(255) NOT NULL,
     role ENUM('student','instructor','admin') NOT NULL,
     admin_status ENUM('pending','accepted','rejected') DEFAULT 'pending',
-    instructor_status ENUM('pending','accepted','rejected') DEFAULT 'pending'
+    instructor_status ENUM('pending','accepted','rejected') DEFAULT 'pending',
+    joined_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )";
 
 $table2 = "CREATE TABLE IF NOT EXISTS categories (

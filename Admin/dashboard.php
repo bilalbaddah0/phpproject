@@ -11,7 +11,7 @@ if (!isset($_SESSION['role']) || strtolower($_SESSION['role']) !== 'admin') {
 require_once __DIR__ . '/../Shared/db_connection.php';
 
 // Get users
-$stmt = $pdo->query("SELECT user_id, full_name, role, admin_status, instructor_status FROM users ORDER BY user_id DESC");
+$stmt = $pdo->query("SELECT user_id, full_name, role, admin_status, instructor_status, joined_at FROM users ORDER BY user_id DESC");
 $allUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Get courses with instructor name and enrollment counts
@@ -114,7 +114,7 @@ $totalUsers = count($allUsers);
                                         <?php echo ucfirst($status); ?>
                                     </span>
                                 </td>
-                                <td><?php echo isset($user['created_at']) ? formatDate($user['created_at']) : 'N/A'; ?></td>
+                                <td><?php echo isset($user['joined_at']) ? date('M d, Y', strtotime($user['joined_at'])) : 'N/A'; ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
