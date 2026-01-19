@@ -51,6 +51,14 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Helper to check if student marked course completed
+function isCourseCompletedPDO($pdo, $student_id, $course_id) {
+    $s = $pdo->prepare("SELECT is_completed FROM student_course_status WHERE student_id = ? AND course_id = ? LIMIT 1");
+    $s->execute([$student_id, $course_id]);
+    $r = $s->fetch(PDO::FETCH_ASSOC);
+    return ($r && $r['is_completed'] == 1);
+}
+
 // Handle enrollment
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['enroll'])) {
     $course_id = intval($_POST['course_id']);
@@ -58,14 +66,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['enroll'])) {
 
     if (isEnrolledPDO($pdo, $student_id, $course_id)) {
         $_SESSION['error'] = 'You are already enrolled in this course.';
-        header('Location: course_view.php?id=' . $course_id);
+        header('Location: browse.php');
         exit;
     }
 
     $ins = $pdo->prepare("INSERT INTO enrollments (student_id, course_id) VALUES (?, ?)");
     if ($ins->execute([$student_id, $course_id])) {
+        // Initialize tracking record (not completed by default)
+        $up = $pdo->prepare("INSERT INTO student_course_status (student_id, course_id, is_completed) VALUES (?, ?, 0) ON DUPLICATE KEY UPDATE student_id = student_id");
+        $up->execute([$student_id, $course_id]);
+
         $_SESSION['success'] = 'Successfully enrolled in the course!';
-        header('Location: course_view.php?id=' . $course_id);
+        header('Location: browse.php');
         exit;
     } else {
         $_SESSION['error'] = 'Failed to enroll. Please try again.';
@@ -171,9 +183,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['enroll'])) {
                                 </div>
                                 
                                 <?php if ($isEnrolled): ?>
-                                    <a href="course_view.php?id=<?php echo $course['course_id']; ?>" class="btn btn-sm btn-secondary">
-                                        View Course
-                                    </a>
+                                    <?php $isCompleted = isCourseCompletedPDO($pdo, $_SESSION['user_id'], $course['course_id']); ?>
+                                    <?php if ($isCompleted): ?>
+                                        <form method="POST" action="course_status.php" style="margin:0; display:inline;">
+                                            <input type="hidden" name="course_id" value="<?php echo $course['course_id']; ?>">
+                                            <input type="hidden" name="completed" value="0">
+                                            <button type="submit" class="btn btn-sm btn-outline">Mark as not done</button>
+                                        </form>
+                                        <span class="badge badge-success" style="margin-left:0.5rem;">Completed</span>
+                                    <?php else: ?>
+                                        <form method="POST" action="course_status.php" style="margin:0; display:inline;">
+                                            <input type="hidden" name="course_id" value="<?php echo $course['course_id']; ?>">
+                                            <input type="hidden" name="completed" value="1">
+                                            <button type="submit" class="btn btn-sm btn-primary">Mark as done</button>
+                                        </form>
+                                    <?php endif; ?>
                                 <?php else: ?>
                                     <form method="POST" style="margin: 0;">
                                         <input type="hidden" name="course_id" value="<?php echo $course['course_id']; ?>">

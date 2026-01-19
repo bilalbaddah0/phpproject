@@ -46,7 +46,7 @@ $totalUsers = count($allUsers);
                     <li><a href="courses.php">Courses</a></li>
                     <li><a href="course_approvals.php">Approvals</a></li>
                     <li><a href="categories.php">Categories</a></li>
-                    <li><span>Admin: <?php echo htmlspecialchars($_SESSION['full_name']); ?></span></li>
+                    <li><span><?php echo htmlspecialchars($_SESSION['full_name']); ?></span></li>
                     <li>
                         <form action="../Shared/logout.php" method="POST" style="display: inline;">
                             <button type="submit" class="btn btn-sm btn-outline">Logout</button>

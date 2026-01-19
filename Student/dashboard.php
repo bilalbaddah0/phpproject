@@ -21,30 +21,29 @@ $stmt = $pdo->prepare("SELECT e.enrollment_id, e.course_id,
 $stmt->execute([$student_id]);
 $enrolledCourses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Compute progress for each enrollment
-foreach ($enrolledCourses as &$course) {
-    $totalStmt = $pdo->prepare("SELECT COUNT(*) FROM lessons WHERE course_id = ?");
-    $totalStmt->execute([$course['course_id']]);
-    $totalLessons = (int)$totalStmt->fetchColumn();
-
-    if ($totalLessons > 0) {
-        $completedStmt = $pdo->prepare("SELECT COUNT(*) FROM lesson_progress WHERE enrollment_id = ? AND is_completed = 1");
-        $completedStmt->execute([$course['enrollment_id']]);
-        $completed = (int)$completedStmt->fetchColumn();
-        $course['progress_percentage'] = round(100 * $completed / $totalLessons, 1);
-    } else {
-        $course['progress_percentage'] = 0;
+// Determine completion state for each enrollment via student_course_status table
+$courseIds = array_map(fn($c) => $c['course_id'], $enrolledCourses);
+$placeholders = $courseIds ? implode(',', array_fill(0, count($courseIds), '?')) : 'NULL';
+$statusMap = [];
+if (!empty($courseIds)) {
+    $stmt = $pdo->prepare("SELECT course_id, is_completed FROM student_course_status WHERE student_id = ? AND course_id IN ($placeholders)");
+    $params = array_merge([$student_id], $courseIds);
+    $stmt->execute($params);
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($rows as $r) {
+        $statusMap[$r['course_id']] = (int)$r['is_completed'];
     }
+}
+
+foreach ($enrolledCourses as &$course) {
+    $course['is_completed'] = isset($statusMap[$course['course_id']]) && $statusMap[$course['course_id']] == 1;
 }
 unset($course);
 
 // Calculate statistics
 $totalCourses = count($enrolledCourses);
-$completedCourses = count(array_filter($enrolledCourses, function($course) {
-    return isset($course['progress_percentage']) && ((float)$course['progress_percentage'] >= 100);
-}));
+$completedCourses = count(array_filter($enrolledCourses, fn($c) => $c['is_completed']));
 $inProgressCourses = $totalCourses - $completedCourses;
-$avgProgress = $totalCourses > 0 ? array_sum(array_map(fn($c) => (float)($c['progress_percentage'] ?? 0), $enrolledCourses)) / $totalCourses : 0;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -89,10 +88,6 @@ $avgProgress = $totalCourses > 0 ? array_sum(array_map(fn($c) => (float)($c['pro
                 <div class="stat-value"><?php echo $completedCourses; ?></div>
                 <div class="stat-label">Completed</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value"><?php echo round($avgProgress, 1); ?>%</div>
-                <div class="stat-label">Average Progress</div>
-            </div>
         </div>
 
         <div class="card">
@@ -117,25 +112,23 @@ $avgProgress = $totalCourses > 0 ? array_sum(array_map(fn($c) => (float)($c['pro
                                 <p class="course-instructor">👨‍🏫 <?php echo htmlspecialchars($course['instructor_name']); ?></p>
                                 
                                 <div>
-                                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                        <span style="font-size: 0.875rem;">Progress</span>
-                                        <span style="font-size: 0.875rem; font-weight: 600;">
-                                            <?php echo round($course['progress_percentage'], 1); ?>%
-                                        </span>
+                                    <div style="display:flex; gap:0.5rem; align-items:center;">
+                                        <?php if ($course['is_completed']): ?>
+                                            <span class="badge badge-success">Completed</span>
+                                            <form method="POST" action="course_status.php" style="margin:0 0 0 0; display:inline;">
+                                                <input type="hidden" name="course_id" value="<?php echo $course['course_id']; ?>">
+                                                <input type="hidden" name="completed" value="0">
+                                                <button type="submit" class="btn btn-sm btn-outline">Mark as not done</button>
+                                            </form>
+                                        <?php else: ?>
+                                            <span class="badge badge-primary">In Progress</span>
+                                            <form method="POST" action="course_status.php" style="margin:0 0 0 0; display:inline;">
+                                                <input type="hidden" name="course_id" value="<?php echo $course['course_id']; ?>">
+                                                <input type="hidden" name="completed" value="1">
+                                                <button type="submit" class="btn btn-sm btn-primary">Mark as done</button>
+                                            </form>
+                                        <?php endif; ?>
                                     </div>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: <?php echo $course['progress_percentage']; ?>%"></div>
-                                    </div>
-                                </div>
-
-                                <div class="course-meta">
-                                    <?php $enroll_status = ((float)($course['progress_percentage'] ?? 0) >= 100) ? 'completed' : 'in progress'; ?>
-                                    <span class="badge badge-<?php echo $enroll_status === 'completed' ? 'success' : 'primary'; ?>">
-                                        <?php echo htmlspecialchars(ucfirst($enroll_status)); ?>
-                                    </span>
-                                    <a href="course_view.php?id=<?php echo $course['course_id']; ?>" class="btn btn-sm btn-primary">
-                                        <?php echo $course['progress_percentage'] > 0 ? 'Continue' : 'Start'; ?>
-                                    </a>
                                 </div>
                             </div>
                         </div>

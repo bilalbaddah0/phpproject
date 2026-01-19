@@ -1,33 +1,43 @@
 <?php
 // registerProcess.php — handles registration POST
+session_start();
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    $_SESSION['error'] = 'Invalid request.';
     header('Location: register.php');
     exit;
 }
 
-$username = trim($_POST['username'] ?? '');
+$full_name = trim($_POST['full_name'] ?? '');
 $email = trim($_POST['email'] ?? '');
-$password = $_POST['password'] ?? '';
+$password = trim($_POST['password'] ?? '');
+$role = $_POST['role'] ?? '';
 
-if ($username === '' || $email === '' || $password === '') {
+if ($full_name === '' || $email === '' || $password === '' || !in_array($role, ['admin', 'instructor', 'student'])) {
+    $_SESSION['error'] = 'Please fill all fields and select a valid role.';
     header('Location: register.php');
     exit;
 }
 
-$pdo = include __DIR__ . '/db_connection.php';
+require_once __DIR__ . '/db_connection.php';
 
-// Check for existing username/email
-$stmt = $pdo->prepare('SELECT id FROM users WHERE username = :u OR email = :e LIMIT 1');
-$stmt->execute([':u' => $username, ':e' => $email]);
+// Check for existing email
+$stmt = $pdo->prepare('SELECT user_id FROM users WHERE email = :e LIMIT 1');
+$stmt->execute([':e' => $email]);
 if ($stmt->fetch()) {
-    // Already exists — in a real app, show message
+    $_SESSION['error'] = 'Email already registered.';
     header('Location: register.php');
     exit;
 }
 
 $hash = password_hash($password, PASSWORD_DEFAULT);
-$stmt = $pdo->prepare('INSERT INTO users (username, email, password) VALUES (:u, :e, :p)');
-$stmt->execute([':u' => $username, ':e' => $email, ':p' => $hash]);
-
-header('Location: login.php');
-exit;
+try {
+    $stmt = $pdo->prepare('INSERT INTO users (full_name, email, password, role) VALUES (:n, :e, :p, :r)');
+    $stmt->execute([':n' => $full_name, ':e' => $email, ':p' => $hash, ':r' => $role]);
+    $_SESSION['success'] = 'Registration successful. Please login.';
+    header('Location: login.php');
+    exit;
+} catch (Exception $e) {
+    $_SESSION['error'] = 'Registration failed. Please try again.';
+    header('Location: register.php');
+    exit;
+}
