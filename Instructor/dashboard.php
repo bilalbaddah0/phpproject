@@ -1,13 +1,11 @@
 <?php
 session_start();
 require_once __DIR__ . '/../Shared/db_connection.php';
-// Ensure instructor is logged in
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || strtolower($_SESSION['role']) !== 'instructor') {
     header('Location: ../Shared/login.php');
     exit;
 }
 $instructor_id = $_SESSION['user_id'];
-// Fetch courses for this instructor with category, approval, and enrollment count
 $stmt = $pdo->prepare("SELECT c.course_id, c.title, c.approval_status, cat.category_name,
     (SELECT COUNT(*) FROM enrollments e WHERE e.course_id = c.course_id) AS enrollment_count
     FROM courses c
@@ -15,7 +13,6 @@ $stmt = $pdo->prepare("SELECT c.course_id, c.title, c.approval_status, cat.categ
     WHERE c.instructor_id = ?");
 $stmt->execute([$instructor_id]);
 $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
-// Calculate statistics
 $totalCourses = count($courses);
 $publishedCourses = count(array_filter($courses, function($c) { return ($c['approval_status'] ?? '') === 'approved'; }));
 $totalEnrollments = array_sum(array_map(function($c) { return (int)($c['enrollment_count'] ?? 0); }, $courses));
@@ -32,7 +29,6 @@ function formatDate($dt) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Instructor Dashboard - LMS</title>
 <style>
-/* Inlined Dashboard CSS */
 * { margin:0; padding:0; box-sizing:border-box; }
 
 body {

@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Basic admin check
 if (!isset($_SESSION['role']) || strtolower($_SESSION['role']) !== 'admin') {
     header('Location: ../Shared/login.php');
     exit;
@@ -9,7 +8,6 @@ if (!isset($_SESSION['role']) || strtolower($_SESSION['role']) !== 'admin') {
 
 require_once __DIR__ . '/../Shared/db_connection.php';
 
-// Handle course update
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['save_course'])) {
         $course_id = intval($_POST['course_id']);
@@ -41,7 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Get all courses
 $stmt = $pdo->query("SELECT c.course_id, c.title, c.price, c.level, c.category_id, cat.category_name, u.full_name AS instructor_name,
     (SELECT COUNT(*) FROM enrollments e WHERE e.course_id = c.course_id) AS enrollment_count
     FROM courses c
@@ -49,7 +46,6 @@ $stmt = $pdo->query("SELECT c.course_id, c.title, c.price, c.level, c.category_i
     LEFT JOIN users u ON c.instructor_id = u.user_id");
 $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Get all categories for dropdown
 $cat_stmt = $pdo->query("SELECT category_id, category_name FROM categories");
 $categories = $cat_stmt->fetchAll(PDO::FETCH_ASSOC);
 $category_options = [];

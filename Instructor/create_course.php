@@ -1,15 +1,12 @@
 <?php
 session_start();
 require_once __DIR__ . '/../Shared/db_connection.php';
-// Ensure instructor is logged in
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || strtolower($_SESSION['role']) !== 'instructor') {
     header('Location: ../Shared/login.php');
     exit;
 }
-// Fetch categories
 $catStmt = $pdo->query("SELECT category_id, category_name FROM categories ORDER BY category_name ASC");
 $categories = $catStmt->fetchAll(PDO::FETCH_ASSOC);
-// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = trim($_POST['title'] ?? '');
     $description = trim($_POST['description'] ?? '');
@@ -40,7 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Course - LMS</title>
     <style>
-        /* Inlined styles with variables replaced */
         * {
             margin: 0;
             padding: 0;
@@ -196,14 +192,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #6B7280;
         }
 
-        /* Grid for category/level */
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1rem;
         }
 
-        /* Flex buttons */
         .flex-gap {
             display: flex;
             gap: 1rem;

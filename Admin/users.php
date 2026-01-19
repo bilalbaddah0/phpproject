@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Basic admin check
 if (!isset($_SESSION['role']) || strtolower($_SESSION['role']) !== 'admin') {
     header('Location: ../Shared/login.php');
     exit;
@@ -9,12 +8,10 @@ if (!isset($_SESSION['role']) || strtolower($_SESSION['role']) !== 'admin') {
 
 require_once __DIR__ . '/../Shared/db_connection.php';
 
-// Handle user status update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $user_id = intval($_POST['user_id']);
     $status = isset($_POST['status']) ? trim($_POST['status']) : '';
 
-    // Fetch user role
     $stmt = $pdo->prepare("SELECT role FROM users WHERE user_id = ?");
     $stmt->execute([$user_id]);
     $target = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -49,13 +46,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
         } else {
             $_SESSION['error'] = 'Cannot change status for students here.';
         }
-    }
-
-    header('Location: users.php');
+    }    header('Location: users.php');
     exit;
 }
 
-// Handle user deletion
 if (isset($_GET['delete'])) {
     $user_id = intval($_GET['delete']);
     if ($user_id == $_SESSION['user_id']) {
@@ -81,7 +75,6 @@ if ($role_filter) {
 }
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Provide a simple date formatter if missing
 if (!function_exists('formatDate')) {
     function formatDate($d) {
         $ts = strtotime($d);

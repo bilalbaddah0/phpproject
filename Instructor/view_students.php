@@ -2,7 +2,6 @@
 session_start();
 require_once __DIR__ . '/../Shared/db_connection.php';
 
-// Ensure instructor is logged in
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || strtolower($_SESSION['role']) !== 'instructor') {
     header('Location: ../Shared/login.php');
     exit;
@@ -11,7 +10,6 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || strtolower($_SE
 $instructor_id = $_SESSION['user_id'];
 $course_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
-// Verify the course belongs to the instructor
 $course_check = $pdo->prepare("SELECT course_id, title FROM courses WHERE course_id = ? AND instructor_id = ?");
 $course_check->execute([$course_id, $instructor_id]);
 $course = $course_check->fetch(PDO::FETCH_ASSOC);
@@ -22,7 +20,6 @@ if (!$course) {
     exit;
 }
 
-// Fetch enrolled students
 $stmt = $pdo->prepare("
     SELECT u.user_id, u.full_name, u.email, e.enrollment_id, 
            (SELECT is_completed FROM student_course_status WHERE student_id = u.user_id AND course_id = ?) AS is_completed

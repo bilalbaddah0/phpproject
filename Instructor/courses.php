@@ -1,16 +1,15 @@
 <?php
 session_start();
 require_once __DIR__ . '/../Shared/db_connection.php';
-// Ensure instructor is logged in
+
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || strtolower($_SESSION['role']) !== 'instructor') {
     header('Location: ../Shared/login.php');
     exit;
 }
 $instructor_id = $_SESSION['user_id'];
-// Handle course deletion
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_course_id'])) {
     $delete_id = intval($_POST['delete_course_id']);
-    // Check if course belongs to instructor and has no enrollments
     $check = $pdo->prepare("SELECT COUNT(*) AS cnt FROM courses WHERE course_id = ? AND instructor_id = ?");
     $check->execute([$delete_id, $instructor_id]);
     $row = $check->fetch();
@@ -29,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_course_id'])) 
         exit;
     }
 }
-// Fetch courses for this instructor with more details
+
 $stmt = $pdo->prepare("SELECT c.course_id, c.title, c.description, c.price, c.level, c.approval_status, cat.category_name,
     (SELECT COUNT(*) FROM enrollments e WHERE e.course_id = c.course_id) AS enrollment_count
     FROM courses c
@@ -45,7 +44,6 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Courses - LMS</title>
     <style>
-        /* Inlined styles with variables replaced */
         * {
             margin: 0;
             padding: 0;
@@ -182,7 +180,6 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
             background-color: #F9FAFB;
         }
 
-        /* Text secondary inline */
         .text-secondary {
             color: #6B7280;
         }

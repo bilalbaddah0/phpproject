@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/db_connection.php'; // your connection file
+require_once __DIR__ . '/db_connection.php';
 session_start();
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -28,7 +28,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit;
     }
 
-    // Check status for admin
     if ($user['role'] === 'admin') {
         if ($user['admin_status'] === 'pending') {
             $_SESSION['error'] = "Admin approval pending. Please wait for approval.";
@@ -41,7 +40,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
-    // Check status for instructor
     if ($user['role'] === 'instructor') {
         if ($user['instructor_status'] === 'pending') {
             $_SESSION['error'] = "Instructor approval pending. Please wait for approval.";
@@ -54,16 +52,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
-    // Regenerate session id to prevent session fixation
     session_regenerate_id(true);
 
-    // Set session variables
     $_SESSION['user_id'] = $user['user_id'];
     $_SESSION['full_name'] = $user['full_name'];
     $_SESSION['role'] = $user['role'];
     $_SESSION['email'] = $user['email'];
 
-    // Redirect based on role
     switch (strtolower($user['role'])) {
         case 'admin':
             header("Location: ../Admin/dashboard.php");
