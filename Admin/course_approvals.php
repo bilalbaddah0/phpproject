@@ -14,7 +14,6 @@ try {
     $pdo->exec("ALTER TABLE courses ADD COLUMN IF NOT EXISTS approval_status ENUM('pending','approved','rejected') DEFAULT 'pending'");
     $pdo->exec("ALTER TABLE courses ADD COLUMN IF NOT EXISTS approved_by INT NULL");
     $pdo->exec("ALTER TABLE courses ADD COLUMN IF NOT EXISTS approved_at DATETIME NULL");
-    $pdo->exec("ALTER TABLE courses ADD COLUMN IF NOT EXISTS rejection_reason TEXT NULL");
 } catch (PDOException $e) {
     // Ignore
 }
@@ -29,9 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$_SESSION['user_id'], $course_id]);
         $_SESSION['success'] = 'Course approved successfully!';
     } elseif ($action === 'reject') {
-        $rejection_reason = trim($_POST['rejection_reason'] ?? 'Not specified');
-        $stmt = $pdo->prepare("UPDATE courses SET approval_status = 'rejected', approved_by = ?, approved_at = NOW(), rejection_reason = ? WHERE course_id = ?");
-        $stmt->execute([$_SESSION['user_id'], $rejection_reason, $course_id]);
+        $stmt = $pdo->prepare("UPDATE courses SET approval_status = 'rejected', approved_by = ?, approved_at = NOW() WHERE course_id = ?");
+        $stmt->execute([$_SESSION['user_id'], $course_id]);
         $_SESSION['success'] = 'Course rejected.';
     }
 
@@ -43,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $filter = $_GET['filter'] ?? 'pending';
 
 // Build query
-$baseSql = "SELECT c.course_id, c.title, c.description, c.price, c.level, c.approval_status, c.rejection_reason,
+$baseSql = "SELECT c.course_id, c.title, c.description, c.price, c.level, c.approval_status,
         cat.category_name, u.full_name as instructor_name,
         (SELECT COUNT(*) FROM enrollments WHERE course_id = c.course_id) as enrollment_count
         FROM courses c
@@ -151,12 +149,6 @@ if (!function_exists('formatDate')) {
 
                 <p style="margin:0.5rem 0;"><?php echo htmlspecialchars(substr($course['description'],0,200)).'...'; ?></p>
 
-                <?php if(!empty($course['rejection_reason'])): ?>
-                    <div class="alert alert-danger">
-                        <strong>Rejection Reason:</strong> <?php echo htmlspecialchars($course['rejection_reason']); ?>
-                    </div>
-                <?php endif; ?>
-
                 <?php if($course['approval_status']==='pending'): ?>
                     <div class="course-actions">
                         <form method="POST" style="display:inline;">
@@ -164,20 +156,10 @@ if (!function_exists('formatDate')) {
                             <input type="hidden" name="course_id" value="<?php echo $course['course_id']; ?>">
                             <button type="submit" class="btn btn-success" onclick="return confirm('Approve this course?')">✓ Approve</button>
                         </form>
-                        <button type="button" class="btn btn-danger" onclick="toggleRejectForm(<?php echo $course['course_id']; ?>)">✗ Reject</button>
-                    </div>
-                    <div id="reject-form-<?php echo $course['course_id']; ?>" class="rejection-form">
-                        <form method="POST">
+                        <form method="POST" style="display:inline;">
                             <input type="hidden" name="action" value="reject">
                             <input type="hidden" name="course_id" value="<?php echo $course['course_id']; ?>">
-                            <div class="form-group">
-                                <label>Rejection Reason</label>
-                                <textarea name="rejection_reason" class="form-control" rows="3" required placeholder="Explain why this course is rejected..."></textarea>
-                            </div>
-                            <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
-                                <button type="submit" class="btn btn-danger">Confirm Rejection</button>
-                                <button type="button" class="btn btn-secondary" onclick="toggleRejectForm(<?php echo $course['course_id']; ?>)">Cancel</button>
-                            </div>
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Reject this course?')">✗ Reject</button>
                         </form>
                     </div>
                 <?php endif; ?>

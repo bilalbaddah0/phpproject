@@ -248,8 +248,11 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 </td>
                                 <td><?php echo (int)($course['enrollment_count'] ?? 0); ?></td>
                                 <td>
-                                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <div style="display: flex; gap: 0.25rem; align-items: center; white-space: nowrap;">
                                         <a href="edit_course.php?id=<?php echo (int)$course['course_id']; ?>" class="btn btn-sm btn-secondary">Edit</a>
+                                        <?php if ((int)($course['enrollment_count'] ?? 0) > 0): ?>
+                                            <a href="view_students.php?id=<?php echo (int)$course['course_id']; ?>" class="btn btn-sm" style="background-color: #8B5CF6; color: white;">View</a>
+                                        <?php endif; ?>
                                         <?php if ((int)($course['enrollment_count'] ?? 0) === 0): ?>
                                             <form method="POST" style="display:inline; margin:0;" onsubmit="return confirm('Delete this course?');">
                                                 <input type="hidden" name="delete_course_id" value="<?php echo (int)$course['course_id']; ?>">

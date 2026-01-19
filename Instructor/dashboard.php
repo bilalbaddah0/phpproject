@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || strtolower($_SE
 }
 $instructor_id = $_SESSION['user_id'];
 // Fetch courses for this instructor with category, approval, and enrollment count
-$stmt = $pdo->prepare("SELECT c.course_id, c.title, c.approval_status, c.rejection_reason, cat.category_name,
+$stmt = $pdo->prepare("SELECT c.course_id, c.title, c.approval_status, cat.category_name,
     (SELECT COUNT(*) FROM enrollments e WHERE e.course_id = c.course_id) AS enrollment_count
     FROM courses c
     LEFT JOIN categories cat ON c.category_id = cat.category_id
@@ -215,9 +215,6 @@ a:hover { text-decoration:underline; }
                                 ?>">
                                     <?php echo htmlspecialchars(ucfirst($course['approval_status'] ?? '-')); ?>
                                 </span>
-                                <?php if (($course['approval_status'] ?? '') === 'rejected' && !empty($course['rejection_reason'])): ?>
-                                    <span style="cursor:help; font-size:0.875rem;" title="<?php echo htmlspecialchars($course['rejection_reason']); ?>">ℹ️</span>
-                                <?php endif; ?>
                             </td>
                             <td><?php echo (int)($course['enrollment_count'] ?? 0); ?> students</td>
                         </tr>

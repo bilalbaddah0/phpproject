@@ -1,17 +1,19 @@
 <?php
+// Database configuration
 $servername = "localhost";
 $username = "root";
 $password = "";
+$dbname = "lms_database";
 
+// Connect to MySQL server
 $conn = new mysqli($servername, $username, $password);
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$dbname = "lms_database";
+// Create database
 $sql = "CREATE DATABASE IF NOT EXISTS $dbname";
-
 if ($conn->query($sql) === TRUE) {
     echo "Database created successfully\n";
 } else {
@@ -20,6 +22,7 @@ if ($conn->query($sql) === TRUE) {
 
 $conn->select_db($dbname);
 
+// Define table structures
 $table1 = "CREATE TABLE IF NOT EXISTS users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -29,7 +32,6 @@ $table1 = "CREATE TABLE IF NOT EXISTS users (
     admin_status ENUM('pending','accepted','rejected') DEFAULT 'pending',
     instructor_status ENUM('pending','accepted','rejected') DEFAULT 'pending'
 )";
-
 
 $table2 = "CREATE TABLE IF NOT EXISTS categories (
     category_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -48,12 +50,11 @@ $table3 = "CREATE TABLE IF NOT EXISTS courses (
     approval_status ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
     approved_by INT NULL,
     approved_at DATETIME NULL,
-    rejection_reason TEXT NULL,
     FOREIGN KEY (instructor_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL
 )";
 
-$table5 = "CREATE TABLE IF NOT EXISTS enrollments (
+$table4 = "CREATE TABLE IF NOT EXISTS enrollments (
     enrollment_id INT AUTO_INCREMENT PRIMARY KEY,
     student_id INT NOT NULL,
     course_id INT NOT NULL,
@@ -61,32 +62,7 @@ $table5 = "CREATE TABLE IF NOT EXISTS enrollments (
     FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE
 )";
 
-if ($conn->query($table1) === TRUE) {
-    echo "Users table created successfully\n";
-} else {
-    echo "Error creating users table: " . $conn->error . "\n";
-}
-
-if ($conn->query($table2) === TRUE) {
-    echo "Categories table created successfully\n";
-} else {
-    echo "Error creating categories table: " . $conn->error . "\n";
-}
-
-if ($conn->query($table3) === TRUE) {
-    echo "Courses table created successfully\n";
-} else {
-    echo "Error creating courses table: " . $conn->error . "\n";
-}
-
-if ($conn->query($table5) === TRUE) {
-    echo "Enrollments table created successfully\n";
-} else {
-    echo "Error creating enrollments table: " . $conn->error . "\n";
-}
-
-// Tracking at course level (students mark course as done/not done)
-$table6 = "CREATE TABLE IF NOT EXISTS student_course_status (
+$table5 = "CREATE TABLE IF NOT EXISTS student_course_status (
     id INT AUTO_INCREMENT PRIMARY KEY,
     student_id INT NOT NULL,
     course_id INT NOT NULL,
@@ -97,10 +73,16 @@ $table6 = "CREATE TABLE IF NOT EXISTS student_course_status (
     FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE
 )";
 
-if ($conn->query($table6) === TRUE) {
-    echo "Student course status table created successfully\n";
-} else {
-    echo "Error creating student_course_status table: " . $conn->error . "\n";
+// Create all tables
+$tables = [$table1, $table2, $table3, $table4, $table5];
+$tableNames = ['Users', 'Categories', 'Courses', 'Enrollments', 'Student Course Status'];
+
+foreach ($tables as $index => $sql) {
+    if ($conn->query($sql) === TRUE) {
+        echo $tableNames[$index] . " table created successfully\n";
+    } else {
+        echo "Error creating " . strtolower($tableNames[$index]) . " table: " . $conn->error . "\n";
+    }
 }
 
 $conn->close();

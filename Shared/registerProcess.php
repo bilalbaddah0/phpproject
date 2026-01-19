@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $full_name = trim($_POST['full_name'] ?? '');
 $email = trim($_POST['email'] ?? '');
-$password = $_POST['password'] ?? '';
+$password = trim($_POST['password'] ?? '');
 $role = $_POST['role'] ?? '';
 
 if ($full_name === '' || $email === '' || $password === '' || !in_array($role, ['admin', 'instructor', 'student'])) {
