@@ -16,6 +16,13 @@ $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $totalCourses = count($courses);
 $publishedCourses = count(array_filter($courses, function($c) { return ($c['approval_status'] ?? '') === 'approved'; }));
 $totalEnrollments = array_sum(array_map(function($c) { return (int)($c['enrollment_count'] ?? 0); }, $courses));
+
+$uniqueStudentsStmt = $pdo->prepare("SELECT COUNT(DISTINCT e.student_id) as unique_students FROM enrollments e 
+    JOIN courses c ON e.course_id = c.course_id 
+    WHERE c.instructor_id = ?");
+$uniqueStudentsStmt->execute([$instructor_id]);
+$uniqueStudentsResult = $uniqueStudentsStmt->fetch(PDO::FETCH_ASSOC);
+$uniqueStudents = (int)($uniqueStudentsResult['unique_students'] ?? 0);
 function formatDate($dt) {
     if (!$dt) return '-';
     $ts = strtotime($dt);
@@ -174,7 +181,7 @@ a:hover { text-decoration:underline; }
             <div class="stat-label">Published Courses</div>
         </div>
         <div class="stat-card">
-            <div class="stat-value"><?php echo $totalEnrollments; ?></div>
+            <div class="stat-value"><?php echo $uniqueStudents; ?></div>
             <div class="stat-label">Total Students</div>
         </div>
     </div>
