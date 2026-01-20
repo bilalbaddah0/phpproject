@@ -1,4 +1,4 @@
-# PHP Project
+# LMS Project
 
 ## How to Run the Project
 
