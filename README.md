@@ -14,7 +14,7 @@ htdocs/
 5. Import the SQL file into your database:
 
    * Open **phpMyAdmin**
-   * Create a new database (e.g., `lms_database`)
+   * Open the database`lms_database`
    * Click **Import** and select the SQL file from the main project folder
 6. Open browser and visit:
 
