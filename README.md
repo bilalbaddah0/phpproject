@@ -24,7 +24,7 @@ http://localhost/project-folder-name
 
 ---
 
-## 👤 Default Users (Example)
+## Default Users (Example)
 
 | Role       | Email                                           | Password      |
 | ---------- | ----------------------------------------------- | ------------- |
